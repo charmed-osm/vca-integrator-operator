@@ -1,0 +1,40 @@
+# Copyright 2022 David Garcia
+# See LICENSE file for licensing details.
+
+options:
+  accounts:
+    description: |
+      Content of the .local/share/juju/accounts.yaml file,
+      which includes the relevant information about the accounts.
+    type: string
+  controllers:
+    description: |
+      Content of the .local/share/juju/controllers.yaml file,
+      which includes the relevant information about the controllers.
+    type: string
+  public-key:
+    description: |
+      Juju public key, usually located at ~/.local/share/juju/ssh/juju_id_rsa.pub
+    type: string
+  lxd-cloud:
+    description: |
+      Name and credentials of the lxd cloud.
+      This cloud will be used by N2VC to deploy LXD Proxy Charms.
+
+      The expected input is the following:
+        <lxd-cloud-name>[:<lxd-credential-name>]
+
+        By default, the <lxd-credential-name> will be the same as
+        <lxd-cloud-name>.
+    type: string
+  k8s-cloud:
+    description: |
+      Name and credentials of the k8s cloud.
+      This cloud will be used by N2VC to deploy K8s Proxy Charms.
+
+      The expected input is the following:
+        <k8s-cloud-name>[:<k8s-credential-name>]
+
+        By default, the <k8s-credential-name> will be the same as
+        <k8s-cloud-name>.
+    type: string

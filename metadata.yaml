@@ -1,0 +1,16 @@
+# Copyright 2022 Canonical Ltd.
+# See LICENSE file for licensing details.
+
+name: osm-vca-integrator
+display-name: OSM VCA Integrator
+summary: Deploy VCA integrator Operator Charm
+description: |
+  This Operator deploys the vca-integrator charm that
+  facilitates the integration between OSM charms and
+  the VCA (Juju controller).
+maintainers:
+  - David Garcia <david.garcia@canonical.com> 
+
+provides:
+  vca:
+    interface: osm-vca

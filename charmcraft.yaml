@@ -1,0 +1,21 @@
+# Copyright 2022 Canonical Ltd.
+# See LICENSE file for licensing details.
+
+type: "charm"
+bases:
+  - build-on:
+      - name: "ubuntu"
+        channel: "20.04"
+    run-on:
+      - name: "ubuntu"
+        channel: "20.04"
+parts:
+  charm:
+    build-environment:
+    - CRYPTOGRAPHY_DONT_BUILD_RUST: 1
+    build-packages:
+      - build-essential
+      - libssl-dev
+      - libffi-dev
+      - python3-dev
+      - cargo
