@@ -50,35 +50,26 @@ requires:
 `src/charm.py`:
 
 ```
-from charms.zookeeper_k8s.v0.zookeeper import ZooKeeperEvents, ZooKeeperRequires
+from charms.osm_vca_integrator.v0.vca import VcaData, VcaIntegratorEvents, VcaRequires
 from ops.charm import CharmBase
 
 
 class MyCharm(CharmBase):
 
-    on = ZooKeeperEvents()
+    on = VcaIntegratorEvents()
 
     def __init__(self, *args):
         super().__init__(*args)
-        self.zookeeper = ZooKeeperRequires(self)
+        self.vca = VcaRequires(self)
         self.framework.observe(
-            self.on.zookeeper_clients_changed,
-            self._on_zookeeper_clients_changed,
-        )
-        self.framework.observe(
-            self.on.zookeeper_clients_broken,
-            self._on_zookeeper_clients_broken,
+            self.on.vca_data_changed,
+            self._on_vca_data_changed,
         )
 
-    def _on_zookeeper_clients_changed(self, event):
-        # Get zookeeper client addresses
-        client_addresses: str = self.zookeeper.hosts
-        # client_addresses => "zk-0:2181,zk-1:2181"
-
-    def _on_zookeeper_clients_broken(self, event):
-        # Stop service
-        # ...
-        self.unit.status = BlockedStatus("need zookeeper relation")
+    def _on_vca_data_changed(self, event):
+        # Get Vca data
+        data: VcaData = self.vca.data
+        # data.endpoints => "localhost:17070"
 ```
 
 You can file bugs
@@ -86,7 +77,7 @@ You can file bugs
 """
 
 import logging
-from typing import Dict
+from typing import Dict, Optional
 
 from ops.charm import CharmBase, CharmEvents, RelationChangedEvent
 from ops.framework import EventBase, EventSource, Object
@@ -166,7 +157,7 @@ class VcaRequires(Object):
         self.framework.observe(charm.on[endpoint_name].relation_changed, self._on_relation_changed)
 
     @property
-    def data(self) -> VcaData:
+    def data(self) -> Optional[VcaData]:
         """Vca data from the relation."""
         relation: Relation = self.model.get_relation(self.endpoint_name)
         if not relation or relation.app not in relation.data:
