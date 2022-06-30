@@ -38,3 +38,65 @@ options:
         By default, the <k8s-credential-name> will be the same as
         <k8s-cloud-name>.
     type: string
+  model-configs:
+    type: string
+    description: |
+      Yaml content with all the default model-configs to be sent
+      in the relation vca relation.
+
+      Example:
+        juju config vca-integrator model-configs='
+        agent-metadata-url: <>
+        agent-stream: ...
+        apt-ftp-proxy:
+        apt-http-proxy:
+        apt-https-proxy:
+        apt-mirror:
+        apt-no-proxy:
+        automatically-retry-hooks:
+        backup-dir:
+        cloudinit-userdata:
+        container-image-metadata-url:
+        container-image-stream:
+        container-inherit-properties:
+        container-networking-method:
+        default-series:
+        default-space:
+        development:
+        disable-network-management:
+        egress-subnets:
+        enable-os-refresh-update:
+        enable-os-upgrade:
+        fan-config:
+        firewall-mode:
+        ftp-proxy:
+        http-proxy:
+        https-proxy:
+        ignore-machine-addresses:
+        image-metadata-url:
+        image-stream:
+        juju-ftp-proxy:
+        juju-http-proxy:
+        juju-https-proxy:
+        juju-no-proxy:
+        logforward-enabled:
+        logging-config:
+        lxd-snap-channel:
+        max-action-results-age:
+        max-action-results-size:
+        max-status-history-age:
+        max-status-history-size:
+        net-bond-reconfigure-delay:
+        no-proxy:
+        provisioner-harvest-mode:
+        proxy-ssh:
+        snap-http-proxy:
+        snap-https-proxy:
+        snap-store-assertions:
+        snap-store-proxy:
+        snap-store-proxy-url:
+        ssl-hostname-verification:
+        test-mode:
+        transmit-vendor-metrics:
+        update-status-hook-interval:
+        '

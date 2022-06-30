@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 from typing import Dict, Set
 
+import yaml
 from charms.osm_vca_integrator.v0.vca import VcaData, VcaProvides
 from juju.controller import Controller
 from ops.charm import CharmBase
@@ -29,11 +30,12 @@ JUJU_CONFIGS = {
 
 
 class CharmError(Exception):
-    """Charm error class."""
+    """Charm Error Exception."""
 
-    def __init__(self, message: str, status: StatusBase = BlockedStatus) -> None:
+    def __init__(self, message: str, status_class: StatusBase = BlockedStatus) -> None:
         self.message = message
-        self.status = status
+        self.status_class = status_class
+        self.status = status_class(message)
 
 
 class VcaIntegratorCharm(CharmBase):
@@ -79,11 +81,10 @@ class VcaIntegratorCharm(CharmBase):
             self._validate_config()
             self._write_controller_config_files()
             self._check_controller()
+            self.vca_provider.update_vca_data(self.vca_data)
+            self.unit.status = ActiveStatus()
         except CharmError as e:
-            self.unit.status = e.status(f"{e.message}")
-            return
-        self.vca_provider.update_vca_data(self.vca_data)
-        self.unit.status = ActiveStatus()
+            self.unit.status = e.status
 
     # ---------------------------------------------------------------------------
     #   Validation and configuration
@@ -106,6 +107,12 @@ class VcaIntegratorCharm(CharmBase):
         # Check if any clouds are set
         if not self.clouds_set:
             raise CharmError("no clouds set")
+
+        if self.config.get("model-configs"):
+            try:
+                yaml.safe_load(self.config["model-configs"])
+            except Exception:
+                raise CharmError("invalid yaml format for model-configs")
 
     def _write_controller_config_files(self) -> None:
         Path(f"{JUJU_DATA}/ssh").mkdir(parents=True, exist_ok=True)
@@ -168,6 +175,9 @@ class VcaIntegratorCharm(CharmBase):
                     else k8s_cloud_parts[0],
                 }
             )
+        if self.config.get("model-configs"):
+            data["model-configs"] = yaml.safe_load(self.config["model-configs"])
+
         return data
 
     async def _get_vca_data_from_controller(self) -> Dict[str, str]:

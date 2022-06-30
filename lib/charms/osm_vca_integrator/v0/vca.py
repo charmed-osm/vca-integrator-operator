@@ -76,8 +76,9 @@ You can file bugs
 [here](https://github.com/charmed-osm/osm-vca-integrator-operator/issues)!
 """
 
+import json
 import logging
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 from ops.charm import CharmBase, CharmEvents, RelationChangedEvent
 from ops.framework import EventBase, EventSource, Object
@@ -93,7 +94,7 @@ LIBAPI = 0
 
 # Increment this PATCH version before using `charmcraft publish-lib` or reset
 # to 0 if you are raising the major API version
-LIBPATCH = 2
+LIBPATCH = 3
 
 
 logger = logging.getLogger(__name__)
@@ -118,24 +119,24 @@ class VcaIntegratorEvents(CharmEvents):
     vca_data_changed = EventSource(VcaDataChangedEvent)
 
 
-RELATION_MANDATORY_KEYS = ("endpoints", "user", "secret", "public-key", "cacert")
-RELATION_OPTIONAL_KEYS = ("lxd-cloud", "k8s-cloud")
+RELATION_MANDATORY_KEYS = ("endpoints", "user", "secret", "public-key", "cacert", "model-configs")
 
 
 class VcaData:
     """Vca data class."""
 
-    def __init__(self, data: Dict[str, str]) -> None:
-        self.data = data
-        self.endpoints = data["endpoints"]
-        self.user = data["user"]
-        self.secret = data["secret"]
-        self.public_key = data["public-key"]
-        self.cacert = data["cacert"]
-        self.lxd_cloud = data.get("lxd-cloud")
-        self.lxd_credentials = data.get("lxd-credentials")
-        self.k8s_cloud = data.get("k8s-cloud")
-        self.k8s_credentials = data.get("k8s-credentials")
+    def __init__(self, data: Dict[str, Any]) -> None:
+        self.data: str = data
+        self.endpoints: str = data["endpoints"]
+        self.user: str = data["user"]
+        self.secret: str = data["secret"]
+        self.public_key: str = data["public-key"]
+        self.cacert: str = data["cacert"]
+        self.lxd_cloud: str = data.get("lxd-cloud")
+        self.lxd_credentials: str = data.get("lxd-credentials")
+        self.k8s_cloud: str = data.get("k8s-cloud")
+        self.k8s_credentials: str = data.get("k8s-credentials")
+        self.model_configs: Dict[str, Any] = data.get("model-configs", {})
 
 
 class VcaDataMissingError(Exception):
@@ -164,7 +165,8 @@ class VcaRequires(Object):
             logger.debug("no application data in the event")
             return
 
-        relation_data = relation.data[relation.app]
+        relation_data: Dict = dict(relation.data[relation.app])
+        relation_data["model-configs"] = json.loads(relation_data.get("model-configs", "{}"))
         try:
             self._validate_relation_data(relation_data)
             return VcaData(relation_data)
@@ -214,4 +216,6 @@ class VcaProvides(Object):
             if not relation or self.model.app not in relation.data:
                 logger.debug("relation app data not ready yet")
             for key, value in vca_data.data.items():
+                if key == "model-configs":
+                    value = json.dumps(value)
                 relation.data[self.model.app][key] = value
